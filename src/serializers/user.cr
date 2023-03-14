@@ -1,13 +1,7 @@
-alias MessageList = Array(String)
-alias ErrorMessages = MessageList | Hash(String, MessageList)
+require "../lib/serializers"
 
-class Serializer
-end
 
 class LoginSerializer < Serializer
-  def initialize(@input_data)
-  end
+  @username = StringField.new required: true, allow_null: false
+  @password = StringField.new required: true, allow_null: false
 end
-
-
-
