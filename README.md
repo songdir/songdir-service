@@ -1,4 +1,4 @@
-# sondgir service
+# songdir service
 Songdir es un servicio web para gestionar canciones y listas permitiendo cargar letras, letra+acordes, partituras o imágenes por canción.
 Songdir is a web service to manage songs and lists, allowing to upload lyrics, lyrics+chords, sheets or images per song.
 
