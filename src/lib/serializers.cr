@@ -1,5 +1,7 @@
 require "json"
 
+require "./exceptions"
+
 alias MessageList = Array(String)
 
 alias ErrorMessages = MessageList | Hash(String, MessageList)
@@ -9,26 +11,6 @@ alias SerializableNumber = Int32 | Float64 | String | Nil
 alias JsonData = Hash(String, Array(JSON::Any) | Bool | Float64 | Hash(String, JSON::Any) | Int64 | String | Nil)
 
 DATETIME_ISOFORMAT = "%Y-%m-%dT%H:%M:%S"
-
-class ValidationError < Exception
-  property body
-
-  def initialize(@body : String | Hash(String, Array(String)))
-    if @body.is_a?(String)
-      @body = {
-        "errors" => [@body.to_s]
-      }
-    end
-  end
-
-  def status
-    400
-  end
-
-  def to_s
-    @body.to_s
-  end
-end
 
 
 def common_validations(parent_obj,

@@ -15,3 +15,5 @@ license: MIT
 dependencies:
   grip:
     github: grip-framework/grip
+  pg:
+    github: will/crystal-pg

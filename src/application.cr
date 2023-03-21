@@ -1,14 +1,25 @@
 require "grip"
 
 require "./controllers/user"
+require "./lib/middleware/authorization"
 
 class Application < Grip::Application
   def initialize(environment : String, serve_static : Bool)
     super(environment, serve_static)
 
-    scope "/api" do
-      scope "/v1" do
-        post "/login", LoginController
+    pipeline :api, [
+      AuthorizationPipe.new
+    ]
+
+    scope "/" do
+      post "/signin", SigninController
+      post "/signup", SignupController
+
+      scope "/api" do
+        pipe_through :api
+        scope "/v1" do
+          
+        end
       end
     end
 

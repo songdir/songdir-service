@@ -1,12 +1,12 @@
 require "grip"
 
-require "./serializers"
+require "./exceptions"
 
 class ExceptionHandler < Grip::Controllers::Http
   def call(context : Context) : Context
     begin
       super(context)
-    rescue exception : ValidationError
+    rescue exception : APIException
       context.put_status(exception.status).json(exception.body)
     end
   end
