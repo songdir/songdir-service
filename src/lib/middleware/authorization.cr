@@ -8,10 +8,12 @@ class AuthorizationPipe
   include HTTP::Handler
 
   def call(context : HTTP::Server::Context) : HTTP::Server::Context
-    auth_header = context.get_req_header "Authorization"
-    token = auth_header.split(" ")[1] if auth_header else ""
-    if !is_jwt_valid?(token, SECRET_KEY)
-      raise UnAuthorized("Invalid authorization token")
+    auth_header = context.request.headers.fetch "Authorization", ""
+    token = /^Token (.+)$/.match(auth_header).not_nil![1]?
+    token = "" if token.nil?
+    if !is_jwt_valid?(token, JWT_SECRET_KEY)
+      raise UnAuthorized.new "Invalid authorization token"
     end
+    context
   end
 end

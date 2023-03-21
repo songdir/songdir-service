@@ -12,7 +12,7 @@ class SigninController < ExceptionHandler
   def post(context : Context) : Context
     data = context.fetch_json_params
     SigninSerializer.new data, raise_exception: true
-    user_repository = UserRepository.from_grip_context context
+    user_repository = UserRepository.new
     usecase = SigninUseCase.new(user_repository: user_repository)
     signin_request = SigninRequest.from_json data
     response = usecase.execute signin_request
@@ -25,7 +25,7 @@ class SignupController < ExceptionHandler
   def post(context : Context) : Context
     data = context.fetch_json_params
     SignupSerializer.new data, raise_exception: true
-    user_repository = UserRepository.from_grip_context context
+    user_repository = UserRepository.new
     usecase = SignupUseCase.new(user_repository: user_repository)
     signup_request = SignupRequest.from_json data
     response = usecase.execute signup_request

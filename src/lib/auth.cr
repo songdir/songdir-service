@@ -2,7 +2,7 @@ require "json"
 require "base64"
 require "random/secure"
 require "openssl/pkcs5"
-require "random/cipher"
+require "openssl/cipher"
 
 require "./request_objects/user"
 require "./exceptions"
@@ -41,14 +41,15 @@ end
 
 
 def decrypt(data, key)
+  data_bytes = data.to_slice
   cipher = OpenSSL::Cipher.new("aes-256-cbc")
   cipher.decrypt
   cipher.key = key
-  cipher.iv = data[0, 32]
-  data += 32
+  cipher.iv = data_bytes[0, 32]
+  data_bytes += 32
 
   io = IO::Memory.new
-  io.write(cipher.update(data))
+  io.write(cipher.update(data_bytes))
   io.write(cipher.final)
   io.rewind
 
@@ -56,18 +57,18 @@ def decrypt(data, key)
 end
 
 
-def create_jwt_token(request : LoginRequest, expiration_minutes, secret_key) : String
+def create_jwt_token(request : SigninRequest, expiration_minutes, secret_key)
   header = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}"
   utcnow = Time.utc
   expiration_span = Time::Span.new(minutes: expiration_minutes)
   body = {
-    "username" => login_request.username,
-    "role" => auth.role,
+    "username" => request.username,
+    "role" => request.role,
     "iat" => utcnow.to_unix_ms,
     "exp" => (utcnow + expiration_span).to_unix_ms
   }
   header_b64 = Base64.encode header
-  body_b64 Base64.encode body.to_json
+  body_b64 = Base64.encode body.to_json
   fragment = "#{header_b64}.#{body_b64}"
 
   salt = Random::Secure.random_bytes(32)
@@ -94,11 +95,11 @@ def is_jwt_valid?(token : String, secret_key : String)
   if original_signature != signature
     return false
   end
-  exp_ms = body["exp"].as(Int32)
+  exp_ms = body["exp"].as_i
   utcnow = Time.utc
   exp_date = Time.unix_ms(exp_ms)
   if utcnow > exp_date
-    raise LoginTimeout("Token expired")
+    raise LoginTimeout.new "Token expired"
   end
   true
 end
