@@ -6,12 +6,17 @@ Songdir is a web service to manage songs and lists, allowing to upload lyrics, l
 
 Install crystal compiler in your system. Also install shards which is the package manager.
 
-## Usage
-
-Once the crystal package was installed successfully, then run:
-
+Run:
 ```bash
 $ cd songdir_service
+$ shards install
+```
+
+## Usage
+
+Once the crystal packages were installed successfully, then run:
+
+```bash
 $ crystal src/application.cr
 ```
 
