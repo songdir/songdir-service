@@ -1,5 +1,3 @@
-require "random/secure"
-
 require "../lib/request_objects/user"
 require "../lib/exceptions"
 require "../lib/auth"
@@ -16,10 +14,14 @@ class SigninUseCase
     if user.username.empty?
       raise UnAuthorized.new "Invalid credentials were provided"
     end
-    salt = Random::Secure.random_bytes(32)
-    password_key = key_derivation PASSWORD_SECRET_KEY, salt
-    decrypted_password = decrypt request.password, password_key
-    if request.password != decrypted_password
+    if !user.is_active
+      raise UnAuthorized.new "User is inactive"
+    end
+    role = @user_repository.get_role_by_id user.role_id
+    request.role = role.name
+    encrypted_password = encrypt request.password, PASSWORD_SECRET_KEY
+    password_b64 = Base64.strict_encode encrypted_password
+    if password_b64 != user.password
       raise UnAuthorized.new "Invalid credentials were provided"
     end
     {

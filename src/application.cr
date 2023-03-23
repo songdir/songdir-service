@@ -13,12 +13,11 @@ class Application < Grip::Application
 
     scope "/" do
       post "/signin", SigninController
-      post "/signup", SignupController
 
       scope "/api" do
         pipe_through :api
         scope "/v1" do
-          
+          post "/signup", SignupController
         end
       end
     end

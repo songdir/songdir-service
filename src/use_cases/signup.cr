@@ -1,5 +1,4 @@
 require "base64"
-require "random/secure"
 
 require "../lib/request_objects/user"
 require "../lib/exceptions"
@@ -13,9 +12,7 @@ class SignupUseCase
   end
 
   def execute(request : SignupRequest)
-    salt = Random::Secure.random_bytes(32)
-    password_key = key_derivation PASSWORD_SECRET_KEY, salt
-    request.password = Base64.encode encrypt(request.password, password_key)
+    request.password = Base64.strict_encode encrypt(request.password, PASSWORD_SECRET_KEY)
     request.is_active = ENABLE_EMAIL_CONFIRMATION == "false"
     user = @user_repository.create request
     {

@@ -25,7 +25,7 @@ class SignupController < ExceptionHandler
   def post(context : Context) : Context
     data = context.fetch_json_params
     SignupSerializer.new data, raise_exception: true
-    user_repository = UserRepository.new
+    user_repository = UserRepository.from_grip_context context
     usecase = SignupUseCase.new(user_repository: user_repository)
     signup_request = SignupRequest.from_json data
     response = usecase.execute signup_request

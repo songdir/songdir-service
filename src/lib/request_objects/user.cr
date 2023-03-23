@@ -3,14 +3,17 @@ class SigninRequest
   property password
   property role
 
-  def initialize(@username : String, @password : String, @role : String)
+  def initialize(@username : String, @password : String, @role="")
   end
 
   def self.from_json(json_obj)
     instance = SigninRequest.allocate
     instance.initialize(username: json_obj["username"].as(String),
-                        password: json_obj["password"].as(String),
-                        role: json_obj["role"].as(String))
+                        password: json_obj["password"].as(String))
+    role = json_obj["role"]?
+    if role
+      instance.role = role.as(String)
+    end
     instance
   end
 end
