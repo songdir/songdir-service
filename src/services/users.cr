@@ -1,46 +1,44 @@
 require "base64"
+require "http/status"
 require "clean_architectures"
 
 require "../domain/email"
+require "../requests/users"
+require "../responses/users"
 require "../repositories/users"
 require "../adapters/gmail"
 
-class SigninUseService
+class SigninUseService < CA::Service(SigninRequest, String, String)
   def initialize(@users_repository : UsersRepository)
   end
 
-  def execute(request : RequestObjects::SigninRequest)
+  def execute(request)
     user = @users_repository.retrieve "users", ["*"], ["username"], request.username, as: Domain::User
     if user.nil?
-      raise CA::APIError.simple_message "Invalid username or password"
+      return error "Invalid username or password", HTTP::Status::BAD_REQUEST
     end
     user = user.not_nil!
     if !user.is_active
-      raise CA::APIError.simple_message "User is not enabled to signin"
+      return error "User is not enabled to signin", HTTP::Status::BAD_REQUEST
     end
     encrypted_password = encrypt(request.password, ENV["PASSWORD_SECRET_KEY"]? || "")
     password_b64 = Base64.strict_encode encrypted_password
     if password_b64 != user.password
-      raise CA::APIError.unauthorized "Invalid credentials were provided"
+      return error "Invalid credentials were provided", HTTP::Status::UNAUTHORIZED
     end
-    {
-      "data" => {
-        "token" => create_jwt_token(request.username, (ENV["JWT_EXPIRATION_MINUTES"]? || 30).to_i32, ENV["JWT_SECRET_KEY"]? || "")
-      }
-    }
+    success create_jwt_token(request.username, (ENV["JWT_EXPIRATION_MINUTES"]? || 30).to_i32, ENV["JWT_SECRET_KEY"]? || "")
   end
 end
 
-class SignupUseCase
-  def initialize(@users_repository : UsersRepository,
-                 @gmail_adapter : GmailAdapter)
+class SignupUseCase < CA::Service(SignupRequest, String, SignupResponse)
+  def initialize(@users_repository : UsersRepository, @gmail_adapter : GmailAdapter)
   end
 
-  def execute(request : SignupRequest)
+  def execute(request)
     if @users_repository.exists? "users", ["username"], request.username
-      raise CA::APIError.simple_message "username was already taken"
+      return error "username was already taken", HTTP::Status::BAD_REQUEST
     elsif @users_repository.exists? "users", ["email"], request.email
-      raise CA::APIError.simple_message "email is already registered"
+      return error "email is already registered", HTTP::Status::BAD_REQUEST
     end
     enc_password = Base64.strict_encode encrypt(request.password, ENV["PASSWORD_SECRET_KEY"]? || "")
     user_id = @users_repository.insert(
@@ -72,11 +70,6 @@ class SignupUseCase
       <a href="#{activation_url}">#{activation_url}</a>
       EOM
     @gmail_adapter.send message
-    {
-      "data" => {
-        "username" => request.username,
-        "email" => request.email
-      }
-    }
+    success SignupResponse.new(request.username, request.email)
   end
 end

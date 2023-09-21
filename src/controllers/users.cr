@@ -1,18 +1,18 @@
 require "grip"
+require "clean_architectures"
 
-require "../request/signin"
+require "../requests/users"
 require "../services/users"
 require "../adapters/gmail"
 require "../repositories/users"
 
-class SigninController < Grip::Controllers::Http
+class SigninController < CA::Controller(CA::StatusError, SigninRequest)
   def post(context : Context) : Context
-    data = context.request.body.not_nil!
-    signin_request = SigninRequest.from_json data
+    signin_request = SigninRequest.from_json get_raw_body(context)
     users_repository = UsersRepository.new get_database()
     service = SigninService.new(users_repository)
     response = service.execute signin_request
-    context.put_status(200).json(response)
+    response_from_either(response)
   end
 end
 
