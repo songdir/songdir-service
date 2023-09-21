@@ -6,7 +6,7 @@ authors:
 
 targets:
   songdir_service:
-    main: src/songdir_service.cr
+    main: src/application.cr
 
 crystal: 1.6.2
 
@@ -17,3 +17,5 @@ dependencies:
     github: grip-framework/grip
   pg:
     github: will/crystal-pg
+  clean_architectures:
+    github: Alvarocz/clean-architectures
