@@ -4,7 +4,7 @@ require "clean_architectures"
 class GmailAdapter < CA::Service
   def initialize(@config)
     super.initialize(@config, name: "Gmail", description: "Gmail adapter to send automatic emails")
-    @host = @config["GMAIL_API_HOST"] # https://gmail.googleapis.com/upload/gmail
+    @host = @config["GMAIL_API_HOST"]
     @user_id = @config["GMAIL_USER_ID"]
     @api_key = @config["GMAIL_API_KEY"]
   end

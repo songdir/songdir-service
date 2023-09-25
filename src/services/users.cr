@@ -8,8 +8,12 @@ require "../responses/users"
 require "../repositories/users"
 require "../adapters/gmail"
 
-class SigninUseService < CA::Service(SigninRequest, String, String)
+class SigninUseService < CA::Service(SigninRequest, String)
   def initialize(@users_repository : UsersRepository)
+    @user = nil
+  end
+
+  def validate(request)
   end
 
   def execute(request)
@@ -30,7 +34,7 @@ class SigninUseService < CA::Service(SigninRequest, String, String)
   end
 end
 
-class SignupUseCase < CA::Service(SignupRequest, String, SignupResponse)
+class SignupUseCase < CA::Service(SignupRequest, SignupResponse)
   def initialize(@users_repository : UsersRepository, @gmail_adapter : GmailAdapter)
   end
 

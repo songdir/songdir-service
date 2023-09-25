@@ -1,4 +1,5 @@
 require "grip"
+require "granite"
 require "clean_architectures"
 
 require "./controllers/users"
@@ -11,7 +12,6 @@ class Application < Grip::Application
 
     exception Grip::Exceptions::Forbidden, CA::BaseExceptionController
     exception Grip::Exceptions::NotFound,  CA::BaseExceptionController
-    exception Exceptions::APIError,        CA::APIErrorController
 
     pipeline :authorized_api, [
       Pipes::AuthorizationPipe.new
@@ -50,6 +50,8 @@ class Application < Grip::Application
     ENV["PORT"]
   end
 end
+
+Granite::Connections << Granite::Adapter::Pg.new(name: "pg", url: ENV["DATABASE_URL"])
 
 app = Application.new(environment: ENV["ENVIRONMENT"], serve_static: false)
 app.run
