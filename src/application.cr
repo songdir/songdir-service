@@ -2,6 +2,7 @@ require "grip"
 require "granite"
 require "clean_architectures"
 
+require "./pipes/authorization"
 require "./controllers/users"
 require "./controllers/songs"
 require "./controllers/song_lists"
@@ -14,7 +15,7 @@ class Application < Grip::Application
     exception Grip::Exceptions::NotFound,  CA::BaseExceptionController
 
     pipeline :authorized_api, [
-      Pipes::AuthorizationPipe.new
+      AuthorizationPipe.new
     ]
 
     scope "/" do
