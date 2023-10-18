@@ -15,9 +15,9 @@ license: MIT
 dependencies:
   grip:
     github: grip-framework/grip
-  granite:
-    github: amberframework/granite
+  repositories:
+    github: songdir/base-repositories
+  clean-architectures:
+    github: Alvarocz/clean-architectures
   pg:
     github: will/crystal-pg
-  clean_architectures:
-    github: Alvarocz/clean-architectures

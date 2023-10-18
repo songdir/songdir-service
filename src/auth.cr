@@ -1,10 +1,7 @@
 require "json"
 require "base64"
 require "openssl/hmac"
-require "clean_architectures"
-
-require "./requests/users"
-require "./exceptions"
+require "clean-architectures"
 
 module Auth
   enum JWTStatus
@@ -33,7 +30,7 @@ module Auth
     body = {
       "sub" => username,
       "iat" => utcnow.to_unix_ms,
-      "exp" => (utcnow + expiration_span).to_unix_ms
+      "exp" => (utcnow + expiration_span).to_unix_ms,
     }
     header_b64 = Base64.strict_encode header
     body_b64 = Base64.strict_encode body.to_json

@@ -4,9 +4,9 @@ shards:
     git: https://github.com/sija/backtracer.cr.git
     version: 1.2.2
 
-  crapi:
-    git: https://github.com/alvarocz/crapi-base-lib.git
-    version: 0.1.0
+  clean-architectures:
+    git: https://github.com/alvarocz/clean-architectures.git
+    version: 0.1.0+git.commit.5b7f11c7dea71b0c904684d763b9c135769268b5
 
   db:
     git: https://github.com/crystal-lang/crystal-db.git
@@ -18,7 +18,7 @@ shards:
 
   grip:
     git: https://github.com/grip-framework/grip.git
-    version: 2.0.2
+    version: 2.0.3
 
   pg:
     git: https://github.com/will/crystal-pg.git
@@ -27,4 +27,8 @@ shards:
   radix:
     git: https://github.com/luislavena/radix.git
     version: 0.4.1
+
+  repositories:
+    git: https://github.com/songdir/base-repositories.git
+    version: 0.1.0+git.commit.70b67675d6b979eef198514b9701d4b11d1b119d
 

@@ -1,7 +1,7 @@
 class SignupResponse
   include JSON::Serializable
 
-  property usernme : String
+  property username : String
   property email : String
 
   def initialize(@username, @email)
