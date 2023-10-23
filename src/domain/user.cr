@@ -12,8 +12,8 @@ class User
   property email : String
   property password : String
   property created_at : Time
-  property document_number : String = ""
-  property document_type : String = ""
-  property is_confirmed : Bool = false
-  property is_active : Bool = true
+  property document_number = ""
+  property document_type = ""
+  property is_confirmed = false
+  property is_active = true
 end
