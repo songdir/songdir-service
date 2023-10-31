@@ -8,6 +8,6 @@ class SignupConfirmation
 
   property id : String
   property sent_to : String
-  property user_id : Int64
+  property user_id : Int32
   property is_confirmed = false
 end

@@ -6,7 +6,7 @@ class UserRole
   include DB::Serializable::NonStrict
   include JSON::Serializable
 
-  property id : Int64
-  property role_id : Int64
-  property user_id : Int64
+  property id : Int32
+  property role_id : Int32
+  property user_id : Int32
 end

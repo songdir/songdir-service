@@ -6,7 +6,7 @@ class RolePermission
   include DB::Serializable::NonStrict
   include JSON::Serializable
 
-  property id : Int64
-  property role_id : Int64
-  property permission_id : Int64
+  property id : Int32
+  property role_id : Int32
+  property permission_id : Int32
 end

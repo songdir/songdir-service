@@ -22,6 +22,7 @@ class Application < Grip::Application
     scope "/" do
       post "/signin", SigninController
       post "/signup", SignupController
+      put "/signup/confirm/:code", ConfirmSignupController
 
       scope "/api" do
         pipe_through :authorized_api

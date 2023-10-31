@@ -1,6 +1,7 @@
 require "base64"
 require "http/status"
 require "clean-architectures"
+require "repositories/database/sql_functions"
 
 require "../domain/user"
 require "../domain/signup_confirmation"
@@ -13,21 +14,25 @@ require "../repositories/users"
 include HTTP
 
 class SigninService < CA::Service(SigninRequest, String)
-  @user : User? = nil
+  @user : User
 
   def initialize(@users_repository : UsersRepository)
+    @user = User.new
   end
 
   def validate(request)
-    @user = @users_repository.get_by? username: request.username
-    assert !@user.nil?, "Invalid username or password", Status::BAD_REQUEST
-    assert @user.is_active, "User is not enabled to signin", Status::BAD_REQUEST
+    user = @users_repository.get_by? username: eq? request.username
+    assert !user.nil?, "Invalid username or password", Status::UNAUTHORIZED
+    @user = user.not_nil!
+    assert @user.is_active, "User is not enabled to signin", Status::UNAUTHORIZED
+    is_confirmed = @users_repository.is_confirmed? @user.id
+    assert is_confirmed, "You must complete the email confirmation first", Status::UNAUTHORIZED
   end
 
   def execute(request)
     encrypted_password = encrypt(request.password, ENV["PASSWORD_SECRET_KEY"]? || "")
     password_b64 = Base64.strict_encode encrypted_password
-    if password_b64 != @user.not_nil!.password
+    if password_b64 != @user.password
       return error "Invalid credentials were provided", Status::UNAUTHORIZED
     end
     success create_jwt_token(request.username, (ENV["JWT_EXPIRATION_MINUTES"]? || 30).to_i32, ENV["JWT_SECRET_KEY"]? || "")
@@ -39,14 +44,16 @@ class SignupService < CA::Service(SignupRequest, SignupResponse)
   end
 
   def validate(request)
-    assert !@users_repository.exists?(username: request.username), "username was already taken", Status::BAD_REQUEST
-    assert !@users_repository.exists?(email: request.email), "email is already registered", Status::BAD_REQUEST
+    assert !@users_repository.user_exists?(username: eq? request.username), "username was already taken", Status::BAD_REQUEST
+    assert !@users_repository.user_exists?(email: eq? request.email), "email is already registered", Status::BAD_REQUEST
   end
 
   def execute(request)
     enc_password = Base64.strict_encode encrypt(request.password, ENV["PASSWORD_SECRET_KEY"]? || "")
     user_id = @users_repository.create({
       username: request.username,
+      first_name: request.first_name,
+      last_name: request.last_name,
       email: request.email,
       password: enc_password,
       created_at: Time.utc
@@ -78,5 +85,20 @@ class SignupService < CA::Service(SignupRequest, SignupResponse)
     message.body_part HTTP::Headers{"Content-Type" => "text/html"}, html_part
     @gmail_adapter.send message
     success SignupResponse.new(request.username, request.email)
+  end
+end
+
+class ConfirmSignupService < CA::Service(String, Hash(String,Bool))
+  def initialize(@users_repository : UsersRepository)
+  end
+
+  def validate(request)
+    valid_code = @users_repository.is_valid_confirmation? request
+    assert valid_code, "Invalid code", Status::BAD_REQUEST
+  end
+
+  def execute(request)
+    @users_repository.update_confirmation request, confirmed: true
+    success({"confirmed" => true})
   end
 end

@@ -20,5 +20,5 @@ class Song
   property content_mimetype : String
   property created_at : Time
   property updated_at : Time
-  property user_id : Int64
+  property user_id : Int32
 end
