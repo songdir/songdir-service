@@ -41,6 +41,15 @@ module Auth
     "#{fragment}.#{signature}"
   end
 
+  def create_jwt_token_v2(header, body, secret_key)
+    header_b64 = Base64.urlsafe_encode header.to_json
+    body_b64 = Base64.urlsafe_encode body.to_json
+    fragment = "#{header_b64}.#{body_b64}"
+    encrypted_value = encrypt fragment, secret_key
+    signature = Base64.urlsafe_encode encrypted_value
+    "#{fragment}.#{signature}"
+  end
+
   def compare_jwt(token, secret_key)
     components = split_jwt_token token
     if components == {"", "", ""}

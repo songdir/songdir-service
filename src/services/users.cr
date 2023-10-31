@@ -67,7 +67,7 @@ class SignupService < CA::Service(SignupRequest, SignupResponse)
       user_id: user_id
     })
     message = MultipartMessage.new(
-      from: ENV["GOOGLE_USER_ID"],
+      from: ENV["GMAIL_USER_ID"],
       to: request.email,
       subject: "Activación de cuenta Songdir"
     )

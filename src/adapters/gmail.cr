@@ -23,5 +23,6 @@ class GmailAdapter < CA::Adapter
       headers: HTTP::Headers{"Content-TYpe" => "application/json"},
       body: body.to_json
     )
+    puts response.status_code
   end
 end
