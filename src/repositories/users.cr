@@ -7,47 +7,65 @@ include Repositories::Database
 class UsersRepository < DatabaseRepository
   def initialize(database)
     super(database)
-    @users_table = "users"
-    @signup_confirmation_table = "signup_confirmations"
-    @user_fields = [
-      "id",
-      "first_name",
-      "last_name",
-      "email",
+    @table = "users"
+    @user_fields = <<-SQL
+      id,
+      first_name,
+      last_name,
+      username,
+      email,
       "password",
-      "document_number",
-      "document_type",
-      "created_at",
-      "is_confirmed",
-      "is_active"
-    ]
+      document_number,
+      document_type,
+      created_at,
+      is_active,
+      confirmed_at,
+      confirmation_token,
+      confirmation_sent_at
+    SQL
   end
 
-  def get_by?(**query)
-    select_one?(@users_table, @user_fields, query, as: User)
+  def by_username?(username)
+    statement = <<-SQL
+      SELECT #{@user_fields}
+      FROM #{@table}
+      WHERE username = $1
+    SQL
+    @database.query_one? statement, username, as: User
   end
 
-  def user_exists?(**query)
-    exists?(@users_table, query)
+  def get?(username="", email="")
+    statement = String.build do |str|
+      str << <<-SQL
+        SELECT #{@user_fields} FROM #{@table}
+        WHERE username=$1 OR email=$2
+        LIMIT 1
+      SQL
+    end
+    @database.query_one? statement, username, email, as: User
   end
 
   def create(query)
-    insert(@users_table, query, returning: "id")
+    keys = query.keys
+    statement = String.build do |str|
+      str << "INSERT INTO " << @table
+      str << '(' << keys.join(",") << ')'
+      placeholders = keys.map_with_index(1) { |_, index| placeholder_of(index) }
+      str << " VALUES (" << placeholders.join(",") << ')'
+      str << " RETURNING id"
+    end
+    @database.query_one statement, *query.values, &.read(Int32)
   end
 
-  def create_signup_confirmation(query)
-    insert(@signup_confirmation_table, query, returning: "id", as: UUID)
-  end
-
-  def is_valid_confirmation?(code)
-    exists?(@signup_confirmation_table, {id: eq? code})
-  end
-
-  def update_confirmation(code, confirmed : Bool)
-    update(@signup_confirmation_table, {is_confirmed: confirmed}, {id: eq? code})
-  end
-
-  def is_confirmed?(user_id)
-    select_one?(@signup_confirmation_table, ["is_confirmed"], {user_id: eq? user_id}, as: Bool)
+  def confirm_user(code)
+    statement = <<-SQL
+      UPDATE #{@table}
+      SET
+        confirmed_at=$1,
+        confirmation_token=''
+      WHERE confirmation_token=$2
+      RETURNING id
+    SQL
+    @database.query_one statement, Time.utc, code, &.read(Int32)
   end
 end

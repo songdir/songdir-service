@@ -1,8 +1,9 @@
 require "grip"
-require "clean-architectures"
+
+require "./extensions"
 
 class SongListsController < Grip::Controllers::Http
-  include CA::ControllerExtensions
+  include Extensions::EitherResponse
 
   def get(context : Context) : Context
     context.put_status(200)
@@ -22,7 +23,7 @@ class SongListsController < Grip::Controllers::Http
 end
 
 class SongListUpdateController < Grip::Controllers::Http
-  include CA::ControllerExtensions
+  include Extensions::EitherResponse
 
   def put(context : Context) : Context
     context.put_status(200)
@@ -30,7 +31,7 @@ class SongListUpdateController < Grip::Controllers::Http
 end
 
 class SongListDestroyController < Grip::Controllers::Http
-  include CA::ControllerExtensions
+  include Extensions::EitherResponse
 
   def delete(context : Context) : Context
     context.put_status(200)

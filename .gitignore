@@ -6,4 +6,4 @@
 .env
 *.env
 google_service_prv_key.txt
-src/send_message.cr
+send_message.cr

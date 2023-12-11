@@ -1,15 +1,15 @@
 require "grip"
-require "clean-architectures"
 
+require "./extensions"
 require "../requests/users"
 require "../responses/users"
 require "../services/users"
-require "../adapters/gmail"
 require "../repositories/users"
 require "../utils/get_database"
 
 class SigninController < Grip::Controllers::Http
-  include CA::ControllerExtensions
+  include Extensions::RawBody
+  include Extensions::EitherResponse
 
   def post(context : Context) : Context
     signin_request = SigninRequest.from_json get_raw_body(context)
@@ -21,20 +21,21 @@ class SigninController < Grip::Controllers::Http
 end
 
 class SignupController < Grip::Controllers::Http
-  include CA::ControllerExtensions
+  include Extensions::RawBody
+  include Extensions::EitherResponse
 
   def post(context : Context) : Context
     signup_request = SignupRequest.from_json get_raw_body(context)
     users_repository = UsersRepository.new(get_database())
-    gmail_adapter = GmailAdapter.new(CA.config_from_env("GMAIL_API_HOST", "GMAIL_USER_ID", "GMAIL_API_KEY"))
-    service = SignupService.new(users_repository, gmail_adapter)
+    service = SignupService.new(users_repository)
     response = service.call signup_request
     respond_with_either context, response
   end
 end
 
 class ConfirmSignupController < Grip::Controllers::Http
-  include CA::ControllerExtensions
+  include Extensions::RawBody
+  include Extensions::EitherResponse
 
   def put(context : Context) : Context
     users_repository = UsersRepository.new(get_database())

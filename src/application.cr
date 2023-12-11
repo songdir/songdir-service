@@ -30,7 +30,7 @@ class Application < Grip::Application
         get "/songs", SongsController
         get "/song/:id", SongDetailsController
         post "/song/create", SongsController
-        put "/song/:id", SongUpdateController
+        patch "/song/update", SongUpdateController
         delete "/song/:id/delete", SongDestroyController
         # Song lists
         get "/lists", SongListsController
