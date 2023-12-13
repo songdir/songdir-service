@@ -51,7 +51,7 @@ class SignupService < CA::Service(SignupRequest, SignupResponse)
   end
 
   def validate(request)
-    user = @users_repository.get?(username: request.username, email: request.email)
+    user = @users_repository.by_username_or_email?(request.username, request.email)
     if user.nil?
       return
     end
@@ -66,7 +66,7 @@ class SignupService < CA::Service(SignupRequest, SignupResponse)
     enc_password = Base64.strict_encode encrypt(request.password, PASSWORD_SECRET_KEY)
     confirmation_token = UUID.random
     now = Time.utc
-    @users_repository.create({
+    @users_repository.insert({
       username: request.username,
       first_name: request.first_name,
       last_name: request.last_name,

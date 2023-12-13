@@ -30,7 +30,7 @@ class CreateSongService < CA::Service(SongRequest, String)
   def execute(request)
     now = Time.utc
     song_id = UUID.random
-    @songs_repository.create({
+    @songs_repository.insert({
       id: song_id,
       title: request.title,
       subtitle: request.subtitle,
@@ -59,7 +59,7 @@ class UpdateSongService < CA::Service(SongUpdateRequest, SimpleStatusResponse)
   end
 
   def execute(request)
-    @songs_repository.update(request.id, {
+    @songs_repository.update_model(request.id, {
       title: request.title,
       subtitle: request.subtitle,
       artist: request.artist,
@@ -88,7 +88,7 @@ class DeleteSongService < CA::Service(String, SimpleStatusResponse)
   end
 
   def execute(request)
-    @songs_repository.delete(request)
+    @songs_repository.delete("id=$1", request)
     success({
       "id" => request,
       "deleted" => true
