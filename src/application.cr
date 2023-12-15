@@ -34,10 +34,11 @@ class Application < Grip::Application
         delete "/song/:id/delete", SongDestroyController
         # Song lists
         get "/lists", SongListsController
+        get "/list/:id/songs", SongsOfListController
         post "/list/create", SongListsController
-        put "/list/:id", SongListUpdateController
+        patch "/list/update", SongListUpdateController
         delete "/list/:id/delete", SongListDestroyController
-        post "/list/:id/add_song", SongListsController, as: :add_song
+        post "/list/:id/add_songs", SongListsController, as: :add_songs
         get "/list/:id/join", SongListsController, as: :join
       end
     end

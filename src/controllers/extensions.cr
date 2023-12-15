@@ -1,3 +1,5 @@
+require "clean-architectures"
+
 require "../auth"
 require "../conf/settings"
 
@@ -19,14 +21,13 @@ module Extensions
 
   module EitherResponse
     def respond_with_either(context, either)
-      if either.right?
-        value = either.right
+      if either.is_right?
         context.put_status(200)
           .put_resp_header("Content-Type", "application/json; charset=UTF-8")
-          .send_resp("{\"data\": #{value.to_json}}")
+          .send_resp("{\"data\": #{either.value.to_json}}")
       else
-        error = either.left
-        context.put_status(error.not_nil!.status_code)
+        error = either.value.as(CA::Error)
+        context.put_status(error.status_code)
           .put_resp_header("Content-Type", "application/json; charset=UTF-8")
           .send_resp(error.to_json)
       end

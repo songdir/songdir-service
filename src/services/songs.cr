@@ -4,9 +4,8 @@ require "clean-architectures"
 
 require "../domain/song"
 require "../requests/songs"
+require "../responses/simple_response"
 require "../repositories/songs"
-
-alias SimpleStatusResponse = Hash(String, String | Bool)
 
 class GetUserSongsService < CA::Service(Int32, Array(Song))
   def initialize(@songs_repository : SongsRepository)
@@ -51,7 +50,7 @@ class CreateSongService < CA::Service(SongRequest, String)
   end
 end
 
-class UpdateSongService < CA::Service(SongUpdateRequest, SimpleStatusResponse)
+class UpdateSongService < CA::Service(SongUpdateRequest, SimpleResponse)
   def initialize(@songs_repository : SongsRepository)
   end
 
@@ -80,7 +79,7 @@ class UpdateSongService < CA::Service(SongUpdateRequest, SimpleStatusResponse)
   end
 end
 
-class DeleteSongService < CA::Service(String, SimpleStatusResponse)
+class DeleteSongService < CA::Service(String, SimpleResponse)
   def initialize(@songs_repository : SongsRepository)
   end
 
