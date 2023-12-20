@@ -2,6 +2,7 @@ require "pg"
 require "grip"
 
 require "./pipes/authorization"
+require "./handlers/cors"
 require "./handlers/serializable_error"
 require "./controllers/base_exception"
 require "./controllers/users"
@@ -43,6 +44,7 @@ class Application < Grip::Application
       end
     end
     router.insert(0, Grip::Handlers::Log.new)
+    router.insert(1, CORSHandler.new)
     router.insert(2, SerializableErrorHandler.new)
   end
 

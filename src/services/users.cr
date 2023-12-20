@@ -13,7 +13,7 @@ require "../repositories/users"
 
 include HTTP
 
-class SigninService < CA::Service(SigninRequest, String)
+class SigninService < CA::Service(SigninRequest, Hash(String, String))
   @user : User
 
   def initialize(@users_repository : UsersRepository)
@@ -21,8 +21,8 @@ class SigninService < CA::Service(SigninRequest, String)
   end
 
   def validate(request)
-    user = @users_repository.by_username? request.username
-    assert !user.nil?, "Invalid username or password", Status::UNAUTHORIZED
+    user = @users_repository.by_username_or_email? request.username, request.username
+    assert !user.nil?, "Invalid credentials", Status::UNAUTHORIZED
     @user = user.not_nil!
     assert @user.is_active, "User is not enabled to signin", Status::UNAUTHORIZED
     assert @user.is_confirmed?, "You must complete the email confirmation first", Status::UNAUTHORIZED
@@ -42,7 +42,10 @@ class SigninService < CA::Service(SigninRequest, String)
       iat: now.to_unix_ms,
       exp: exp.to_unix_ms
     )
-    success create_jwt_token(header, body, JWT_SECRET_KEY)
+    success({
+      "access_token" => create_jwt_token(header, body, JWT_SECRET_KEY),
+      "username" => request.username
+    })
   end
 end
 
@@ -51,7 +54,7 @@ class SignupService < CA::Service(SignupRequest, SignupResponse)
   end
 
   def validate(request)
-    user = @users_repository.by_username_or_email?(request.username, request.email)
+    user = @users_repository.by_username_or_email? request.username, request.email
     if user.nil?
       return
     end
